@@ -4,14 +4,20 @@ class Form extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isGoing: false,
-      numberOfGuests: 2
+      smsConsent: false,
+      phoneNumber: '',
+      firstName: "",
+      lastName: "",
+      email: "",
+      country: "",
+      dateOfBirth: "",
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
   }
 
   handleInputChange(event) {
+    console.log(event.target.type);
     const target = event.target;
     const value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
@@ -25,14 +31,17 @@ class Form extends React.Component {
   handleSubmit = async (event) => {
     event.preventDefault();
     // destructure the state
-    const { isGoing, numberOfGuests } = this.state;
+    const { smsConsent, firstName, lastName, email, country, phoneNumber, dateOfBirth } = this.state;
+    console.log(dateOfBirth);
     // create a new object to send to the server
     const data = {
       "user": {
-        "first_name": "test2",
-        "last_name": "testy",
-        "email": "testy1234@test.com",
-        "phone_number": "+13239169023"
+        "first_name": firstName,
+        "last_name": lastName,
+        "email": email,
+        "phone_number": phoneNumber,
+        "sms_consent": smsConsent,
+        "country": country
       }
     };
     // send the data to the server
@@ -45,32 +54,84 @@ class Form extends React.Component {
     });
     // get the response from the server
     const body = await response.json();
+
+    if (response.status !== 200) {
+      console.log("error");
+      console.log(body);
+      throw Error(body.message)
+    }
     // log the response to the console
     console.log(body);
   }
 
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
+      <form onSubmit={this.handleSubmit} className="form">
+        <h1>Survey Form</h1>
         <label>
-          Is going:
+          Do you wish to receive SMS notifications?:
           <input
-            name="isGoing"
+            name="smsConsent"
             type="checkbox"
-            checked={this.state.isGoing}
+            checked={this.state.smsConsent}
             onChange={this.handleInputChange} />
         </label>
-        <br />
         <label>
-          Number of guests:
+          First Name:
           <input
-            name="numberOfGuests"
-            type="number"
-            value={this.state.numberOfGuests}
+            name="firstName"
+            type="text"
+            value={this.state.firstName}
+            onChange={this.handleInputChange} />
+        </label>
+        <label>
+          Last Name:
+          <input
+            name="lastName"
+            type="text"
+            value={this.state.lastName}
             onChange={this.handleInputChange} />
         </label>
 
-        <input type="submit" value="Submit" />
+        <label>
+          Phone Number:
+          <input
+            name="lastName"
+            type="text"
+            value={this.state.lastName}
+            onChange={this.handleInputChange} />
+        </label>
+
+        <label>
+          Which country are you from?:
+          <select name="country" value={this.state.country} onChange={this.handleInputChange}>
+            <option value="United Kingdom">United Kingdom</option>
+            <option value="France">France</option>
+            <option value="Germany">Germany</option>
+            <option value="Belgium">Coconut</option>
+            <option value="Italy">Italy</option>
+          </select>
+        </label>
+
+        <label>
+          Email:
+          <input
+            name="email"
+            type="email"
+            value={this.state.email}
+            onChange={this.handleInputChange} />
+        </label>
+
+        <label>
+          Date of Birth:
+          <input
+            name="dateOfBirth"
+            type="date"
+            value={this.state.dateOfBirth}
+            onChange={this.handleInputChange} />
+        </label>
+
+        <input id="submit" type="submit" value="Submit" />
 
       </form>
     );
