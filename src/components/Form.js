@@ -27,7 +27,7 @@ class Form extends React.Component {
   }
 
   emailRegex = new RegExp(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
-  phoneRegex = new RegExp(/^\+?(\d{2}-?\d{3}-?\d{3}-?\d{3}|(\d{3} \d{8}))/);
+  phoneRegex = new RegExp(/^\+?(\d{2}-?\d{3}-?\d{3}-?\d{3}|(\d{3} \d{8}))$/);
 
   handleDateOfBirthBlur = (event) => {
     if (event.target.value === '') {
@@ -99,17 +99,15 @@ class Form extends React.Component {
     }
   }
 
-  handlePhoneBlur = (event) => {
+  handlePhoneNumberBlur = (event) => {
     if (event.target.value === '') {
-      this.setState({ showPhoneNumberError: true, phoneNumberErrorMessage: 'Email is required' });
-    } else if (!this.emailRegex.test(event.target.value)) {
-      this.setState({ showPhoneNumberError: true, phoneNumberErrorMessage: 'Email is invalid' });
+      this.setState({ showPhoneNumberError: true, phoneNumberErrorMessage: 'Phone number is required' });
+    } else if (!this.phoneRegex.test(event.target.value)) {
+      this.setState({ showPhoneNumberError: true, phoneNumberErrorMessage: 'Phone number must be 11 digits' });
     } else {
       this.setState({ showPhoneNumberError: false, phoneNumberErrorMessage: '' });
     }
   }
-
-
 
   // create an async function to handle the form submission
   handleSubmit = async (event) => {
@@ -117,7 +115,6 @@ class Form extends React.Component {
     this.setState({ statusMessage: "", showStatusMessage: false });
     // destructure the state
     const { smsConsent, firstName, lastName, email, country, phoneNumber, dateOfBirth } = this.state;
-    console.log(dateOfBirth);
     // create a new object to send to the server
     const data = {
       "user": {
@@ -149,13 +146,12 @@ class Form extends React.Component {
       throw Error(body.message)
     }
     // log the response to the console
-    console.log(body);
     if (body.message) {
       this.setState({ statusMessage: body.message, showStatusMessage: true });
     } else if (body.detail) {
       this.setState({ statusMessage: body.detail, showStatusMessage: true });
     } else {
-      this.setState({ statusMessage: "success", showStatusMessage: true });
+      this.setState({ statusMessage: "Your details have been submitted, thank you for your time", showStatusMessage: true });
     }
 
   }
@@ -195,17 +191,21 @@ class Form extends React.Component {
             this.state.showLastNameError && <p>Name can't be blank</p>
           }
         </div>
-
-        <label>
-          Phone Number:
-          <input
-            name="phoneNumber"
-            type="text"
-            value={this.state.phoneNumber}
-            onChange={this.handleInputChange}
-            onBlur={this.handlePhoneNumberBlur}
-          />
-        </label>
+        <div className="form-row">
+          <label>
+            Phone Number:
+            <input
+              name="phoneNumber"
+              type="text"
+              value={this.state.phoneNumber}
+              onChange={this.handleInputChange}
+              onBlur={this.handlePhoneNumberBlur}
+            />
+          </label>
+          {
+            this.state.showPhoneNumberError && <p>{this.state.phoneNumberErrorMessage}</p>
+          }
+        </div>
 
         <label>
           Do you wish to receive SMS notifications?:
@@ -220,6 +220,7 @@ class Form extends React.Component {
         <label>
           Which country are you from?:
           <select name="country" value={this.state.country} onChange={this.handleInputChange}>
+            <option value="" hidden></option>
             <option value="United Kingdom">United Kingdom</option>
             <option value="France">France</option>
             <option value="Germany">Germany</option>
