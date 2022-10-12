@@ -11,10 +11,46 @@ class Form extends React.Component {
       email: "",
       country: "",
       dateOfBirth: "",
+      statusMessage: "",
+      showStatusMessage: false,
+      showFirstNameError: false,
+      showLastNameError: false,
+      showEmailError: false,
+      emailErrorMessage: "",
+      showDateOfBirthError: false,
+      dateOfBirthErrorMessage: "",
+      showPhoneNumberError: false,
+      phoneNumberErrorMessage: ""
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
   }
+
+  emailRegex = new RegExp(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
+  phoneRegex = new RegExp(/^\+?(\d{2}-?\d{3}-?\d{3}-?\d{3}|(\d{3} \d{8}))/);
+
+  handleDateOfBirthBlur = (event) => {
+    if (event.target.value === '') {
+      this.setState({ showDateOfBirthError: true, dateOfBirthErrorMessage: 'Date of birth is required' });
+    } else if (this.calculateAge(event.target.value) < 16) {
+      this.setState({ showDateOfBirthError: true, dateOfBirthErrorMessage: 'You must be over 16' });
+    } else {
+      this.setState({ showDateOfBirthError: false });
+    }
+  }
+
+  calculateAge = (dateOfBirth) => {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  }
+
+
 
   handleInputChange(event) {
     console.log(event.target.type);
@@ -22,14 +58,63 @@ class Form extends React.Component {
     const value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
 
+    if (target.type === 'date') {
+      if (event.target.value === '') {
+        this.setState({ showDateOfBirthError: true, dateOfBirthErrorMessage: 'Date of birth is required' });
+      } else if (this.calculateAge(event.target.value) < 16) {
+        this.setState({ showDateOfBirthError: true, dateOfBirthErrorMessage: 'You must be over 16' });
+      } else {
+        this.setState({ showDateOfBirthError: false });
+      }
+    }
+
     this.setState({
       [name]: value
     });
   }
 
+  handleFirstNameBlur = (event) => {
+    if (event.target.value === '') {
+      this.setState({ showFirstNameError: true });
+    } else {
+      this.setState({ showFirstNameError: false });
+    }
+  }
+
+  handleLastNameBlur = (event) => {
+    if (event.target.value === '') {
+      this.setState({ showLastNameError: true });
+    } else {
+      this.setState({ showLastNameError: false });
+    }
+  }
+
+  handleEmailBlur = (event) => {
+    if (event.target.value === '') {
+      this.setState({ showEmailError: true, emailErrorMessage: 'Email is required' });
+    } else if (!this.emailRegex.test(event.target.value)) {
+      this.setState({ showEmailError: true, emailErrorMessage: 'Email is invalid' });
+    } else {
+      this.setState({ showEmailError: false, emailErrorMessage: '' });
+    }
+  }
+
+  handlePhoneBlur = (event) => {
+    if (event.target.value === '') {
+      this.setState({ showPhoneNumberError: true, phoneNumberErrorMessage: 'Email is required' });
+    } else if (!this.emailRegex.test(event.target.value)) {
+      this.setState({ showPhoneNumberError: true, phoneNumberErrorMessage: 'Email is invalid' });
+    } else {
+      this.setState({ showPhoneNumberError: false, phoneNumberErrorMessage: '' });
+    }
+  }
+
+
+
   // create an async function to handle the form submission
   handleSubmit = async (event) => {
     event.preventDefault();
+    this.setState({ statusMessage: "", showStatusMessage: false });
     // destructure the state
     const { smsConsent, firstName, lastName, email, country, phoneNumber, dateOfBirth } = this.state;
     console.log(dateOfBirth);
@@ -41,7 +126,8 @@ class Form extends React.Component {
         "email": email,
         "phone_number": phoneNumber,
         "sms_consent": smsConsent,
-        "country": country
+        "country": country,
+        "date_of_birth": dateOfBirth
       }
     };
     // send the data to the server
@@ -52,8 +138,10 @@ class Form extends React.Component {
       },
       body: JSON.stringify(data)
     });
-    // get the response from the server
+    // get the response from the server and handle in case of error
     const body = await response.json();
+    // prevent an error if the API is not running
+
 
     if (response.status !== 200) {
       console.log("error");
@@ -62,44 +150,71 @@ class Form extends React.Component {
     }
     // log the response to the console
     console.log(body);
+    if (body.message) {
+      this.setState({ statusMessage: body.message, showStatusMessage: true });
+    } else if (body.detail) {
+      this.setState({ statusMessage: body.detail, showStatusMessage: true });
+    } else {
+      this.setState({ statusMessage: "success", showStatusMessage: true });
+    }
+
   }
 
   render() {
     return (
       <form onSubmit={this.handleSubmit} className="form">
         <h1>Survey Form</h1>
+        <div className="form-row">
+          <label htmlFor="firstName">
+            First Name:
+          </label>
+          <input
+            name="firstName"
+            type="text"
+            value={this.state.firstName}
+            onChange={this.handleInputChange}
+            onBlur={this.handleFirstNameBlur}
+            />
+            {
+            this.state.showFirstNameError && <p>Name can't be blank</p>
+            }
+
+        </div>
+        <div className="form-row">
+          <label>
+            Last Name:
+            <input
+              name="lastName"
+              type="text"
+              value={this.state.lastName}
+              onChange={this.handleInputChange}
+              onBlur={this.handleLastNameBlur}
+              />
+          </label>
+          {
+            this.state.showLastNameError && <p>Name can't be blank</p>
+          }
+        </div>
+
+        <label>
+          Phone Number:
+          <input
+            name="phoneNumber"
+            type="text"
+            value={this.state.phoneNumber}
+            onChange={this.handleInputChange}
+            onBlur={this.handlePhoneNumberBlur}
+          />
+        </label>
+
         <label>
           Do you wish to receive SMS notifications?:
           <input
             name="smsConsent"
             type="checkbox"
             checked={this.state.smsConsent}
-            onChange={this.handleInputChange} />
-        </label>
-        <label>
-          First Name:
-          <input
-            name="firstName"
-            type="text"
-            value={this.state.firstName}
-            onChange={this.handleInputChange} />
-        </label>
-        <label>
-          Last Name:
-          <input
-            name="lastName"
-            type="text"
-            value={this.state.lastName}
-            onChange={this.handleInputChange} />
-        </label>
-
-        <label>
-          Phone Number:
-          <input
-            name="lastName"
-            type="text"
-            value={this.state.lastName}
-            onChange={this.handleInputChange} />
+            onChange={this.handleInputChange}
+          />
         </label>
 
         <label>
@@ -108,19 +223,26 @@ class Form extends React.Component {
             <option value="United Kingdom">United Kingdom</option>
             <option value="France">France</option>
             <option value="Germany">Germany</option>
-            <option value="Belgium">Coconut</option>
+            <option value="Belgium">Belgium</option>
             <option value="Italy">Italy</option>
           </select>
         </label>
 
-        <label>
-          Email:
-          <input
-            name="email"
-            type="email"
-            value={this.state.email}
-            onChange={this.handleInputChange} />
-        </label>
+        <div className="form-row">
+          <label>
+            Email:
+            <input
+              name="email"
+              type="email"
+              value={this.state.email}
+              onChange={this.handleInputChange}
+              onBlur={this.handleEmailBlur}
+              />
+          </label>
+          {
+            this.state.showEmailError && <p>{this.state.emailErrorMessage}</p>
+          }
+        </div>
 
         <label>
           Date of Birth:
@@ -128,11 +250,18 @@ class Form extends React.Component {
             name="dateOfBirth"
             type="date"
             value={this.state.dateOfBirth}
-            onChange={this.handleInputChange} />
+            onChange={this.handleInputChange}
+            onBlur={this.handleDateOfBirthBlur}
+          />
+          {
+            this.state.showDateOfBirthError && <p>{this.state.dateOfBirthErrorMessage}</p>
+          }
         </label>
 
         <input id="submit" type="submit" value="Submit" />
-
+        {
+          this.state.statusMessage && <p>{this.state.statusMessage}</p>
+        }
       </form>
     );
   }
