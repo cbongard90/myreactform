@@ -9,7 +9,7 @@ class Form extends React.Component {
       firstName: "",
       lastName: "",
       email: "",
-      country: "",
+      country: "United Kingdom",
       dateOfBirth: "",
       statusMessage: "",
       showStatusMessage: false,
@@ -181,8 +181,7 @@ class Form extends React.Component {
 
 
       if (response.status !== 200) {
-        console.log("error");
-        console.log(body);
+        this.setState({ statusMessage: "An error has occured, please try later.", showStatusMessage: true });
         throw Error(body.message)
       }
       // log the response to the console
@@ -205,35 +204,39 @@ class Form extends React.Component {
       <form onSubmit={this.handleSubmit} className="form">
         <h1>Survey Form</h1>
         <div className="form-row">
-          <label htmlFor="firstName">
-            First Name:
-          </label>
-          <input
-            name="firstName"
-            type="text"
-            value={this.state.firstName}
-            onChange={this.handleInputChange}
-            onBlur={this.handleFirstNameBlur}
-            />
-            {
-            this.state.showFirstNameError && <p>Name can't be blank</p>
-            }
+          <div className="half">
+            <label htmlFor="firstName">
+              First Name:
 
-        </div>
-        <div className="form-row">
-          <label>
-            Last Name:
             <input
-              name="lastName"
+              name="firstName"
               type="text"
-              value={this.state.lastName}
+              value={this.state.firstName}
               onChange={this.handleInputChange}
-              onBlur={this.handleLastNameBlur}
+              onBlur={this.handleFirstNameBlur}
               />
-          </label>
-          {
-            this.state.showLastNameError && <p>Name can't be blank</p>
-          }
+            </label>
+              {
+              this.state.showFirstNameError && <p className="input-notification">Please input your first name</p>
+              }
+
+          </div>
+          <div className="half">
+            <label>
+              Last Name:
+              <input
+                name="lastName"
+                type="text"
+                className="border border-black rounded-lg"
+                value={this.state.lastName}
+                onChange={this.handleInputChange}
+                onBlur={this.handleLastNameBlur}
+                />
+            </label>
+            {
+              this.state.showLastNameError && <p className="input-notification">Please input your last name</p>
+            }
+          </div>
         </div>
         <div className="form-row">
           <label>
@@ -250,16 +253,17 @@ class Form extends React.Component {
             this.state.showPhoneNumberError && <p>{this.state.phoneNumberErrorMessage}</p>
           }
         </div>
-
-        <label>
-          Do you wish to receive SMS notifications?:
-          <input
-            name="smsConsent"
-            type="checkbox"
-            checked={this.state.smsConsent}
-            onChange={this.handleInputChange}
-          />
-        </label>
+        <div className="form-row">
+          <label>
+            Do you wish to receive SMS notifications?:
+            <input
+              name="smsConsent"
+              type="checkbox"
+              checked={this.state.smsConsent}
+              onChange={this.handleInputChange}
+            />
+          </label>
+        </div>
 
         <label hidden>
           Which country are you from?:
@@ -289,6 +293,7 @@ class Form extends React.Component {
           }
         </div>
 
+        <div className="form-row">
         <label>
           Date of Birth:
           <input
@@ -298,10 +303,12 @@ class Form extends React.Component {
             onChange={this.handleInputChange}
             onBlur={this.handleDateOfBirthBlur}
           />
+        </label>
           {
             this.state.showDateOfBirthError && <p>{this.state.dateOfBirthErrorMessage}</p>
           }
-        </label>
+
+        </div>
 
         <input id="submit" type="submit" value="Submit" />
         {
