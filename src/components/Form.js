@@ -109,50 +109,94 @@ class Form extends React.Component {
     }
   }
 
+  validateForm = () => {
+    let isValid = true;
+    if (this.state.firstName === '') {
+      this.setState({ showFirstNameError: true });
+      isValid = false;
+    }
+    if (this.state.lastName === '') {
+      this.setState({ showLastNameError: true });
+      isValid = false;
+    }
+
+    if (this.state.email === '') {
+      this.setState({ showEmailError: true, emailErrorMessage: 'Email is required' });
+      isValid = false;
+    } else if (!this.emailRegex.test(this.state.email)) {
+      this.setState({ showEmailError: true, emailErrorMessage: 'Email is invalid' });
+      isValid = false;
+    }
+
+    if (this.state.dateOfBirth === '') {
+      this.setState({ showDateOfBirthError: true, dateOfBirthErrorMessage: 'Date of birth is required' });
+      isValid = false;
+    } else if (this.calculateAge(this.state.dateOfBirth) < 16) {
+      this.setState({ showDateOfBirthError: true, dateOfBirthErrorMessage: 'You must be over 16' });
+      isValid = false;
+    }
+
+    if (this.state.phoneNumber === '') {
+      this.setState({ showPhoneNumberError: true, phoneNumberErrorMessage: 'Phone number is required' });
+      isValid = false;
+    } else if (!this.phoneRegex.test(this.state.phoneNumber)) {
+      this.setState({ showPhoneNumberError: true, phoneNumberErrorMessage: 'Phone number must be 11 digits' });
+      isValid = false;
+    }
+    return isValid;
+  }
+
   // create an async function to handle the form submission
   handleSubmit = async (event) => {
     event.preventDefault();
     this.setState({ statusMessage: "", showStatusMessage: false });
     // destructure the state
     const { smsConsent, firstName, lastName, email, country, phoneNumber, dateOfBirth } = this.state;
-    // create a new object to send to the server
-    const data = {
-      "user": {
-        "first_name": firstName,
-        "last_name": lastName,
-        "email": email,
-        "phone_number": phoneNumber,
-        "sms_consent": smsConsent,
-        "country": country,
-        "date_of_birth": dateOfBirth
+
+    // check if the form is valid
+    if (this.validateForm()) {
+      // create a new object to send to the server
+      const data = {
+        "user": {
+          "first_name": firstName,
+          "last_name": lastName,
+          "email": email,
+          "phone_number": phoneNumber,
+          "sms_consent": smsConsent,
+          "country": country,
+          "date_of_birth": dateOfBirth
+        }
+      };
+      // send the data to the server
+      const response = await fetch('http://localhost:3000/api/v1/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+      // get the response from the server and handle in case of error
+      const body = await response.json();
+      // prevent an error if the API is not running
+
+
+      if (response.status !== 200) {
+        console.log("error");
+        console.log(body);
+        throw Error(body.message)
       }
-    };
-    // send the data to the server
-    const response = await fetch('http://localhost:3000/api/v1/users', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    });
-    // get the response from the server and handle in case of error
-    const body = await response.json();
-    // prevent an error if the API is not running
-
-
-    if (response.status !== 200) {
-      console.log("error");
-      console.log(body);
-      throw Error(body.message)
-    }
-    // log the response to the console
-    if (body.message) {
-      this.setState({ statusMessage: body.message, showStatusMessage: true });
-    } else if (body.detail) {
-      this.setState({ statusMessage: body.detail, showStatusMessage: true });
+      // log the response to the console
+      if (body.message) {
+        this.setState({ statusMessage: body.message, showStatusMessage: true });
+      } else if (body.detail) {
+        this.setState({ statusMessage: body.detail, showStatusMessage: true });
+      } else {
+        this.setState({ statusMessage: "Your details have been submitted, thank you for your time", showStatusMessage: true });
+      }
     } else {
-      this.setState({ statusMessage: "Your details have been submitted, thank you for your time", showStatusMessage: true });
+      this.setState({ statusMessage: "Please check your details", showStatusMessage: true });
     }
+
 
   }
 
@@ -217,9 +261,9 @@ class Form extends React.Component {
           />
         </label>
 
-        <label>
+        <label hidden>
           Which country are you from?:
-          <select name="country" value={this.state.country} onChange={this.handleInputChange}>
+          <select name="country" value={"United Kingdom"} readOnly>
             <option value="" hidden></option>
             <option value="United Kingdom">United Kingdom</option>
             <option value="France">France</option>
