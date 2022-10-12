@@ -73,12 +73,14 @@ class Form extends React.Component {
     });
   }
 
+
+
   handleFirstNameBlur = (event) => {
-    if (event.target.value === '') {
-      this.setState({ showFirstNameError: true });
-    } else {
-      this.setState({ showFirstNameError: false });
-    }
+    this.firstNameValidation(event.target.value);
+  }
+
+  firstNameValidation = (firstName) => {
+    this.setState({ showFirstNameError: (firstName === '') })
   }
 
   handleLastNameBlur = (event) => {
@@ -111,10 +113,12 @@ class Form extends React.Component {
 
   validateForm = () => {
     let isValid = true;
+
     if (this.state.firstName === '') {
       this.setState({ showFirstNameError: true });
       isValid = false;
     }
+
     if (this.state.lastName === '') {
       this.setState({ showLastNameError: true });
       isValid = false;
@@ -202,63 +206,94 @@ class Form extends React.Component {
   render() {
     return (
       <form onSubmit={this.handleSubmit} className="form">
-        <h1>Survey Form</h1>
+        <h1 className="text-3xl font-bold mb-3">Survey Form</h1>
         <div className="form-row">
-          <div className="half">
+          <div className="half flex items-center">
             <label htmlFor="firstName">
-              First Name:
-
-            <input
-              name="firstName"
-              type="text"
-              value={this.state.firstName}
-              onChange={this.handleInputChange}
-              onBlur={this.handleFirstNameBlur}
-              />
+              First Name
             </label>
-              {
-              this.state.showFirstNameError && <p className="input-notification">Please input your first name</p>
-              }
+            <div className="relative">
+              <input
+                name="firstName"
+                type="text"
+                className="border border-black/10 bg-slate-100 ml-2 rounded-lg px-2 py-1"
+                value={this.state.firstName}
+                onChange={this.handleInputChange}
+                onBlur={this.handleFirstNameBlur}
+                />
+
+                {
+                this.state.showFirstNameError && <p className="input-notification absolute text-xs left-2">Please input your first name</p>
+                }
+            </div>
 
           </div>
-          <div className="half">
-            <label>
-              Last Name:
+          <div className="half flex items-center">
+            <label htmlFor="lastName">
+              Last Name
+            </label>
+            <div className="relative">
               <input
                 name="lastName"
                 type="text"
-                className="border border-black rounded-lg"
+                className="border border-black/10 bg-slate-100 ml-2 rounded-lg px-2 py-1"
                 value={this.state.lastName}
                 onChange={this.handleInputChange}
                 onBlur={this.handleLastNameBlur}
                 />
+              {
+                this.state.showLastNameError && <p className="input-notification absolute text-xs left-2">Please input your last name</p>
+              }
+            </div>
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="half flex items-center">
+            <label htmlFor="phoneNumber" className="min-w-max">
+              Phone N<sup>o</sup>
             </label>
+            <div className="relative">
+              <input
+                name="phoneNumber"
+                type="text"
+                className="border border-black/10 bg-slate-100 ml-2 rounded-lg px-2 py-1"
+                value={this.state.phoneNumber}
+                onChange={this.handleInputChange}
+                onBlur={this.handlePhoneNumberBlur}
+              />
+
+              {
+                this.state.showPhoneNumberError && <p className="input-notification absolute text-xs left-2">{this.state.phoneNumberErrorMessage}</p>
+              }
+            </div>
+          </div>
+          <div className="half flex items-center">
+            <label>
+              Email
+            </label>
+            <div className="relative">
+              <input
+                name="email"
+                type="email"
+                className="border border-black/10 bg-slate-100 ml-2 rounded-lg px-2 py-1"
+                value={this.state.email}
+                onChange={this.handleInputChange}
+                onBlur={this.handleEmailBlur}
+              />
+
             {
-              this.state.showLastNameError && <p className="input-notification">Please input your last name</p>
+                this.state.showEmailError && <p className="input-notification absolute text-xs left-2">{this.state.emailErrorMessage}</p>
             }
+            </div>
           </div>
         </div>
         <div className="form-row">
           <label>
-            Phone Number:
-            <input
-              name="phoneNumber"
-              type="text"
-              value={this.state.phoneNumber}
-              onChange={this.handleInputChange}
-              onBlur={this.handlePhoneNumberBlur}
-            />
-          </label>
-          {
-            this.state.showPhoneNumberError && <p>{this.state.phoneNumberErrorMessage}</p>
-          }
-        </div>
-        <div className="form-row">
-          <label>
-            Do you wish to receive SMS notifications?:
+            Do you wish to receive SMS notifications?
             <input
               name="smsConsent"
               type="checkbox"
+              className="ml-2"
               checked={this.state.smsConsent}
               onChange={this.handleInputChange}
             />
@@ -277,36 +312,26 @@ class Form extends React.Component {
           </select>
         </label>
 
-        <div className="form-row">
-          <label>
-            Email:
-            <input
-              name="email"
-              type="email"
-              value={this.state.email}
-              onChange={this.handleInputChange}
-              onBlur={this.handleEmailBlur}
-              />
-          </label>
-          {
-            this.state.showEmailError && <p>{this.state.emailErrorMessage}</p>
-          }
-        </div>
+
 
         <div className="form-row">
-        <label>
-          Date of Birth:
-          <input
-            name="dateOfBirth"
-            type="date"
-            value={this.state.dateOfBirth}
-            onChange={this.handleInputChange}
-            onBlur={this.handleDateOfBirthBlur}
-          />
-        </label>
-          {
-            this.state.showDateOfBirthError && <p>{this.state.dateOfBirthErrorMessage}</p>
-          }
+          <label htmlFor="dateOfBirth">
+            Date of Birth
+          </label>
+          <div className="relative">
+            <input
+              name="dateOfBirth"
+              type="date"
+              className="border border-black/10 bg-slate-100 ml-2 rounded-lg px-2 py-1"
+              value={this.state.dateOfBirth}
+              onChange={this.handleInputChange}
+              onBlur={this.handleDateOfBirthBlur}
+            />
+
+            {
+              this.state.showDateOfBirthError && <p className="input-notification absolute text-xs left-2">{this.state.dateOfBirthErrorMessage}</p>
+            }
+          </div>
 
         </div>
 
