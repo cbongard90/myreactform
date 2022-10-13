@@ -30,13 +30,19 @@ class Form extends React.Component {
   phoneRegex = new RegExp(/^\+?(\d{2}-?\d{3}-?\d{3}-?\d{3}|(\d{3} \d{8}))$/);
 
   handleDateOfBirthBlur = (event) => {
-    if (event.target.value === '') {
+    this.dateOfBirthValidation(event.target.value)
+  }
+
+  dateOfBirthValidation = (dateOfBirth) => {
+    if (dateOfBirth === '') {
       this.setState({ showDateOfBirthError: true, dateOfBirthErrorMessage: 'Date of birth is required' });
-    } else if (this.calculateAge(event.target.value) < 16) {
+    } else if (this.calculateAge(dateOfBirth) < 16) {
       this.setState({ showDateOfBirthError: true, dateOfBirthErrorMessage: 'You must be over 16' });
     } else {
       this.setState({ showDateOfBirthError: false });
     }
+
+    return this.state.showDateOfBirthError;
   }
 
   calculateAge = (dateOfBirth) => {
@@ -49,8 +55,6 @@ class Form extends React.Component {
     }
     return age;
   }
-
-
 
   handleInputChange(event) {
     console.log(event.target.type);
@@ -80,73 +84,58 @@ class Form extends React.Component {
   }
 
   firstNameValidation = (firstName) => {
-    this.setState({ showFirstNameError: (firstName === '') })
+    this.setState({ showFirstNameError: (firstName === '') });
+    return firstName === '';
   }
 
   handleLastNameBlur = (event) => {
-    if (event.target.value === '') {
-      this.setState({ showLastNameError: true });
-    } else {
-      this.setState({ showLastNameError: false });
-    }
+    this.lastNameValidation(event.target.value);
+  }
+
+  lastNameValidation = (lastName) => {
+    this.setState({ showLastNameError: (lastName === '') });
+    return lastName === '';
   }
 
   handleEmailBlur = (event) => {
-    if (event.target.value === '') {
+    this.emailValidation(event.target.value);
+  }
+
+  emailValidation = (emailInput) => {
+    if (emailInput === '') {
       this.setState({ showEmailError: true, emailErrorMessage: 'Email is required' });
-    } else if (!this.emailRegex.test(event.target.value)) {
+    } else if (!this.emailRegex.test(emailInput)) {
       this.setState({ showEmailError: true, emailErrorMessage: 'Email is invalid' });
     } else {
       this.setState({ showEmailError: false, emailErrorMessage: '' });
     }
+
+    return this.state.showEmailError;
   }
 
   handlePhoneNumberBlur = (event) => {
-    if (event.target.value === '') {
+    this.phoneNumberValidation(event.target.value);
+  }
+
+  phoneNumberValidation = (phoneNumber) => {
+    if (phoneNumber === '') {
       this.setState({ showPhoneNumberError: true, phoneNumberErrorMessage: 'Phone number is required' });
-    } else if (!this.phoneRegex.test(event.target.value)) {
+    } else if (!this.phoneRegex.test(phoneNumber)) {
       this.setState({ showPhoneNumberError: true, phoneNumberErrorMessage: 'Phone number must be 11 digits' });
     } else {
       this.setState({ showPhoneNumberError: false, phoneNumberErrorMessage: '' });
     }
+
+    return this.state.showPhoneNumberError;
   }
 
   validateForm = () => {
-    let isValid = true;
+    let isValid = this.firstNameValidation(this.state.firstName);
+    isValid = this.lastNameValidation(this.state.lastName);
+    isValid = this.emailValidation(this.state.email);
+    isValid = this.dateOfBirthValidation(this.state.dateOfBirth);
+    isValid = this.phoneNumberValidation(this.state.phoneNumber);
 
-    if (this.state.firstName === '') {
-      this.setState({ showFirstNameError: true });
-      isValid = false;
-    }
-
-    if (this.state.lastName === '') {
-      this.setState({ showLastNameError: true });
-      isValid = false;
-    }
-
-    if (this.state.email === '') {
-      this.setState({ showEmailError: true, emailErrorMessage: 'Email is required' });
-      isValid = false;
-    } else if (!this.emailRegex.test(this.state.email)) {
-      this.setState({ showEmailError: true, emailErrorMessage: 'Email is invalid' });
-      isValid = false;
-    }
-
-    if (this.state.dateOfBirth === '') {
-      this.setState({ showDateOfBirthError: true, dateOfBirthErrorMessage: 'Date of birth is required' });
-      isValid = false;
-    } else if (this.calculateAge(this.state.dateOfBirth) < 16) {
-      this.setState({ showDateOfBirthError: true, dateOfBirthErrorMessage: 'You must be over 16' });
-      isValid = false;
-    }
-
-    if (this.state.phoneNumber === '') {
-      this.setState({ showPhoneNumberError: true, phoneNumberErrorMessage: 'Phone number is required' });
-      isValid = false;
-    } else if (!this.phoneRegex.test(this.state.phoneNumber)) {
-      this.setState({ showPhoneNumberError: true, phoneNumberErrorMessage: 'Phone number must be 11 digits' });
-      isValid = false;
-    }
     return isValid;
   }
 
@@ -274,7 +263,7 @@ class Form extends React.Component {
             <div className="relative">
               <input
                 name="email"
-                type="email"
+                type="text"
                 className="border border-black/10 bg-slate-100 ml-2 rounded-lg px-2 py-1"
                 value={this.state.email}
                 onChange={this.handleInputChange}
